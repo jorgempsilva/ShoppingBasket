@@ -1,6 +1,11 @@
 @ShoppingBasket_HostAddress = http://localhost:5230
 
-GET {{ShoppingBasket_HostAddress}}/weatherforecast/
+POST {{ShoppingBasket_HostAddress}}/api/Basket/882ED5B2-CB1D-4873-AA61-C8F7E78EF9D5/items
 Accept: application/json
-
-###
+Content-Type: application/json
+[
+  {
+    "name": "string",
+    "price": 0
+  }
+]

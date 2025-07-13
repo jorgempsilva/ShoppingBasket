@@ -1,0 +1,44 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ShoppingBasket/Dockerfile
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      migrations-local:
+        condition: service_completed_successfully
+    ports:
+      - "5002:8080"
+      - "5003:8081"
+
+  migrations-local:
+    build:
+      context: .
+      dockerfile: ShoppingBasket/Dockerfile
+      target: build
+    environment:
+      ConnectionStrings__SqlContext: "Server=db,1433;Database=ShoppingBasketDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True;Integrated Security=False"
+      ASPNETCORE_ENVIRONMENT: Production
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bash", "/app/Scripts/apply-migrations.sh"]
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-CU13-ubuntu-22.04"
+    ports:
+      - "1433:1433"
+    environment:
+      MSSQL_SA_PASSWORD: "12345678@A"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_TCP_PORT: 1433
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "12345678@A" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
