@@ -4,27 +4,36 @@
 # For more information, please see https://aka.ms/containercompat
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
 
 # This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
-ARG BUILD_CONFIGURATION=Release
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["ShoppingBasket/ShoppingBasket.csproj", "ShoppingBasket/"]
-RUN dotnet restore "./ShoppingBasket/ShoppingBasket.csproj"
-COPY . .
-WORKDIR "/src/ShoppingBasket"
-RUN dotnet build "./ShoppingBasket.csproj" -c %BUILD_CONFIGURATION% -o /app/build
 
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Copy the project files to the container
+COPY ["Scripts/apply-migrations.sh", "/app/Scripts/"]
+RUN chmod +x /app/Scripts/apply-migrations.sh
+COPY ["ShoppingBasket/ShoppingBasket.csproj", "ShoppingBasket/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
+# This stage is used to restore the service project dependencies
+RUN dotnet restore "ShoppingBasket/ShoppingBasket.csproj"
+# Copy the rest of the source code to the container
+COPY . .
+# This stage is used to build the service project
+WORKDIR "/src/ShoppingBasket"
+RUN dotnet build "ShoppingBasket.csproj" -c Release -o /app/build
+RUN dotnet publish "ShoppingBasket.csproj" -c Release -o /app/publish
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ShoppingBasket.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
-
+RUN dotnet publish "ShoppingBasket.csproj" -c Release -o /app/publish
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
