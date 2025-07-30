@@ -12,7 +12,7 @@ public class SqlContext(DbContextOptions<SqlContext> options) : DbContext(option
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder
-            .UseSqlServer("Server=db;Database=ShoppingBasketDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True")
+            .UseSqlServer("Server=db;Database=ShoppingBasketDB;User Id=sa;Password=12345678@A;TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=false;")
             .EnableSensitiveDataLogging();
 
         base.OnConfiguring(optionsBuilder);

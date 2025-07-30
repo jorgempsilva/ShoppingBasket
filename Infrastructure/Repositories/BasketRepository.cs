@@ -1,19 +1,20 @@
 ﻿using Domain.Entities;
 using Domain.Interfaces;
+using Infrastructure.Context;
 
 namespace Infrastructure.Repositories;
 
-public class BasketRepository : IBasketRepository  
+public class BasketRepository(SqlContext sqlContext) : IBasketRepository  
 {
-    private readonly Dictionary<Guid, Item> _items = [];
+    private readonly SqlContext _context = sqlContext;
 
-    public void AddItemToBasket(Item item)
+    public async Task AddItemToBasket(Item item) 
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        if (_items.ContainsKey(item.Id))
+        if (_context.Items.Contains(item))
             throw new ArgumentException("Item with the same ID already exists.", nameof(item));
 
-        _items.Add(item.Id, item);
+        await _context.Items.AddAsync(item);
     }
 }

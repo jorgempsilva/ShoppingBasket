@@ -11,9 +11,9 @@ public class BasketController(BasketService basketService) : ControllerBase
     private readonly BasketService _basketService = basketService;
    
     [HttpPost("{Id}/items")]
-    public IActionResult AddItemToBasket(int Id, [FromBody] List<Item> items)
+    public async Task<IActionResult> AddItemToBasket(int Id, [FromBody] List<Item> items)
     {
-         _basketService.AddItem(Id, items);
+        await _basketService.AddItem(Id, items);
         
         return Ok();
     }
