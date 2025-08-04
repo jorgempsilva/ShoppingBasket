@@ -15,6 +15,6 @@ public class BasketController(BasketService basketService) : ControllerBase
     {
         await _basketService.AddItem(Id, items);
         
-        return Ok();
+        return Created();
     }
 }
