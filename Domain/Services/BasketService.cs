@@ -7,12 +7,12 @@ public class BasketService (IBasketRepository itemRepository)
 {
     private readonly IBasketRepository _itemRepository = itemRepository;
     
-    public void AddItem(int Id, List<Item> Items)
+    public async Task AddItem(int Id, List<Item> Items)
     {
         foreach (var item in Items)
         {
             var product = new Item(item.Name, item.Price); 
-            _itemRepository.AddItemToBasket(product); 
+            await _itemRepository.AddItemToBasket(product); 
         }     
     }
 }

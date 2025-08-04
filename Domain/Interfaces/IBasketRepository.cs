@@ -4,5 +4,5 @@ namespace Domain.Interfaces;
 
 public interface IBasketRepository
 {
-    void AddItemToBasket(Item item);
+    Task AddItemToBasket(Item item);
 }
